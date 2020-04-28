@@ -64,7 +64,34 @@ Future<int> userEkle(Users users) async{
     var sonDeger = db.insert(_userTablosu, users.toMap());
     return sonDeger;
 }
+  Future<List<Map<String, dynamic>>> allUsers() async{
+    var db = await _getDatabase();
+    var sonuc = db.query(_userTablosu, orderBy: '$_id DESC');
+    return sonuc;
+  }
 
+  Future<int> ogrenciGuncelle(Users users) async{
+    var db = await _getDatabase();
+    var sonuc = db.update(_userTablosu, users.toMap(), where: '$_id = ?', whereArgs: [users.id]);
+
+    return sonuc;
+  }
+
+  Future<int> ogrenciSil(int id) async{
+
+    var db = await _getDatabase();
+    var sonuc = db.delete(_userTablosu, where: '$_id = ?' , whereArgs: [id]);
+    return sonuc;
+
+  }
+
+  Future<int> tumOgrenciTablosunuSil() async{
+
+    var db = await _getDatabase();
+    var sonuc = db.delete(_userTablosu);
+    return sonuc;
+
+  }
 
 
 }

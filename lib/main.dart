@@ -24,27 +24,28 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  List<Users> allUserList;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   DatabaseHelper databaseHelper;
+  String _name;
+
   @override
   void initState() {
     super.initState();
+    allUserList = List<Users>();
     databaseHelper = DatabaseHelper();
+    databaseHelper.allUsers().then((mapListesi) {   // Veritabanındaki kullanıcılar uygulama başlarken listeye atıldı.
+      for (Map okunanMap in mapListesi) {
+        allUserList.add(Users.fromMap(okunanMap));
+      }
+      setState(() {});
+    });
   }
-
-
 
   @override
   Widget build(BuildContext context) {
 
-    var aa = DatabaseHelper();
-    aa.userEkle(Users("vedat","vedat","vedat@ved"));
-    aa.userEkle(Users("dilay","vedat","vedat@ved"));
-    aa.userEkle(Users("cigdem","vedat","vedat@ved"));
-    aa.userEkle(Users("annem","vedat","vedat@ved"));
-    aa.userEkle(Users("babam","vedat","vedat@ved"));
-
-    
-
+    //ekle();
 
     return Scaffold(
       body: GestureDetector(
@@ -58,7 +59,8 @@ class _MyHomePageState extends State<MyHomePage> {
               fit: BoxFit.cover,
             ),
           ),
-          child: Center(
+          child: Form(
+            key: _formKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -80,7 +82,16 @@ class _MyHomePageState extends State<MyHomePage> {
                     color: Colors.white54,
                     borderRadius: BorderRadius.circular(20.0),
                   ),
-                  child: TextField(
+                  child: TextFormField(
+                    validator: (String value) {
+                      if (value.isEmpty) {
+                        return 'kullanıcı adı boş olamaz';
+                      }
+                      return null;
+                    },
+                    onSaved: (value){
+                      _name = value;
+                    },
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Kullanıcı Adı',
@@ -165,12 +176,18 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     onPressed: () {
                       print('giris yapildi.');
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CSayfasi(),
-                        ),
-                      );
+                      if(_formKey.currentState.validate()){
+                        _formKey.currentState.save();
+                        if(allUserList[0].kullaniciAdi == _name){
+                          print('basariyla giris yapildi.');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CSayfasi(),
+                            ),
+                          );
+                        }
+                      }
                     },
                   ),
                 ),
@@ -183,7 +200,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
   
   ekle() async{
-    databaseHelper.userEkle(Users('Vedat','ved','ved'));
+    await databaseHelper.userEkle(Users('Vedat','ved','ved'));
+    var sonuc = await databaseHelper.allUsers();
+    debugPrint("Sonuc: " + sonuc[0]['kullaniciAdi']);
   }
 }
 
