@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kutuphane/models/kayit.dart';
 import 'package:kutuphane/models/users.dart';
 import 'package:kutuphane/utils/database_helpers.dart';
 import 'package:sqflite/sqflite.dart';
@@ -23,18 +24,21 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   List<Users> allUserList;
+  var scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   DatabaseHelper databaseHelper;
-  String _name;
+  String _name, _password;
+  final _passwordController = TextEditingController();
+  final _userNameController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     allUserList = List<Users>();
     databaseHelper = DatabaseHelper();
-    databaseHelper.allUsers().then((mapListesi) {   // Veritabanındaki kullanıcılar uygulama başlarken listeye atıldı.
+    databaseHelper.allUsers().then((mapListesi) {
+      // Veritabanındaki kullanıcılar uygulama başlarken listeye atıldı.
       for (Map okunanMap in mapListesi) {
         allUserList.add(Users.fromMap(okunanMap));
       }
@@ -44,10 +48,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-
     //ekle();
 
     return Scaffold(
+      key: scaffoldKey,
       body: GestureDetector(
         onTap: () {
           FocusScope.of(context).requestFocus(new FocusNode());
@@ -83,15 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     borderRadius: BorderRadius.circular(20.0),
                   ),
                   child: TextFormField(
-                    validator: (String value) {
-                      if (value.isEmpty) {
-                        return 'kullanıcı adı boş olamaz';
-                      }
-                      return null;
-                    },
-                    onSaved: (value){
-                      _name = value;
-                    },
+                    controller: _userNameController,
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Kullanıcı Adı',
@@ -116,7 +112,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   margin:
                       EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
-                  child: TextField(
+                  child: TextFormField(
+                    controller: _passwordController,
+                    obscureText: true,
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Şifre',
@@ -147,7 +145,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => Asayfasi(),
+                            builder: (context) => FormScreen(),
                           ),
                         );
                       },
@@ -176,179 +174,44 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     onPressed: () {
                       print('giris yapildi.');
-                      if(_formKey.currentState.validate()){
-                        _formKey.currentState.save();
-                        if(allUserList[0].kullaniciAdi == _name){
-                          print('basariyla giris yapildi.');
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CSayfasi(),
-                            ),
-                          );
+                      print('ad: '+ _userNameController.text);
+                      print('sifre: '+ _passwordController.text);
+                      if (_formKey.currentState.validate()) {
+                        if (allUserList.isEmpty) {
+                          print("Böyle bir kullanici bulunamadı.");
+                        } else {
+                          var uzunluk = allUserList.length;
+                          print('allUserList length: $uzunluk');
+                          print('0. eleman adi: ' + allUserList[0].kullaniciAdi);
+                          print('0. eleman sifre: ' + allUserList[0].sifre);
+                          for(int i=0;i<allUserList.length;i++){
+                            if (allUserList[i].kullaniciAdi == _userNameController.text && allUserList[i].sifre == _passwordController.text) {
+                              _formKey.currentState.save();
+                              print('basariyla giris yapildi.');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => CSayfasi(),
+                                ),
+                              );
+                            }else{
+                              print("Kullanıcı adı veya şifre hatalı");
+                            }
+                          }
                         }
                       }
                     },
                   ),
                 ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-  
-  ekle() async{
-    await databaseHelper.userEkle(Users('Vedat','ved','ved'));
-    var sonuc = await databaseHelper.allUsers();
-    debugPrint("Sonuc: " + sonuc[0]['kullaniciAdi']);
-  }
-}
-
-class Asayfasi extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: GestureDetector(
-        onTap: () {
-          FocusScope.of(context).requestFocus(new FocusNode());
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage("assets/images/library.jpg"),
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Container(
-                  margin: EdgeInsets.fromLTRB(30.0, 35.0, 30.0, 5.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white54,
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  child: TextField(
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: 'Kullanıcı Adı',
-                      hintStyle: TextStyle(
-                        color: Colors.black,
-                        fontSize: 22.0,
-                      ),
-                      suffixIcon: Icon(
-                        Icons.account_circle,
-                        color: Colors.black,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                    ),
-                  ),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white54,
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  margin:
-                  EdgeInsets.symmetric(horizontal: 30.0, vertical: 5.0),
-                  child: TextField(
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: 'Şifre',
-                      hintStyle: TextStyle(
-                        color: Colors.black,
-                        fontSize: 22.0,
-                      ),
-                      suffixIcon: Icon(
-                        Icons.lock,
-                        color: Colors.black,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                    ),
-                  ),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white54,
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  margin:
-                  EdgeInsets.symmetric(horizontal: 30.0,vertical: 5.0),
-                  child: TextField(
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: 'Confirm Şifre',
-                      hintStyle: TextStyle(
-                        color: Colors.black,
-                        fontSize: 22.0,
-                      ),
-                      suffixIcon: Icon(
-                        Icons.lock,
-                        color: Colors.black,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                    ),
-                  ),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white54,
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  margin:
-                  EdgeInsets.symmetric(horizontal: 30.0, vertical: 5.0),
-                  child: TextField(
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: 'E-mail',
-                      hintStyle: TextStyle(
-                        color: Colors.black,
-                        fontSize: 22.0,
-                      ),
-                      suffixIcon: Icon(
-                        Icons.mail,
-                        color: Colors.black,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                    ),
-                  ),
-                ),
-                Container(
-                  width: 150,
-                  height: 50,
-                  margin: EdgeInsets.symmetric(vertical: 5.0),
-                  decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  child: RaisedButton(
-                    color: Colors.black45,
-                    child: Text(
-                      "Kayıt Ol",
-                      style: TextStyle(color: Colors.red, fontSize: 18),
-                    ),
+                /*
+                RaisedButton(
+                  child: Text('Sil'),
                     onPressed: () {
-                      print('giris yapildi.');
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CSayfasi(),
-                        ),
-                      );
+                      _allUserListDelete(context);
                     },
-                  ),
-                ),
+                )
+
+                 */
               ],
             ),
           ),
@@ -357,9 +220,23 @@ class Asayfasi extends StatelessWidget {
     );
   }
 
+  void _allUserListDelete(BuildContext context) async {
+    await databaseHelper.allUserListDelete().then((silinenElemanSayisi) {
+      scaffoldKey.currentState.showSnackBar(
+        SnackBar(
+          content: Text(silinenElemanSayisi.toString() + " kayıt silindi"),
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+      setState(() {
+        allUserList.clear();
+      });
+    });
+  }
 }
 
-class CSayfasi extends StatelessWidget{
+class CSayfasi extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -368,5 +245,4 @@ class CSayfasi extends StatelessWidget{
       ),
     );
   }
-
 }

@@ -61,7 +61,8 @@ void _createDB(Database db, int version) async{
 
 Future<int> userEkle(Users users) async{
     var db = await _getDatabase();
-    var sonDeger = db.insert(_userTablosu, users.toMap());
+    var sonDeger = await db.insert(_userTablosu, users.toMap());
+    print("ogrenci dbye eklendi: $sonDeger");
     return sonDeger;
 }
   Future<List<Map<String, dynamic>>> allUsers() async{
@@ -70,14 +71,13 @@ Future<int> userEkle(Users users) async{
     return sonuc;
   }
 
-  Future<int> ogrenciGuncelle(Users users) async{
+  Future<int> usersGuncelle(Users users) async{
     var db = await _getDatabase();
     var sonuc = db.update(_userTablosu, users.toMap(), where: '$_id = ?', whereArgs: [users.id]);
-
     return sonuc;
   }
 
-  Future<int> ogrenciSil(int id) async{
+  Future<int> userSil(int id) async{
 
     var db = await _getDatabase();
     var sonuc = db.delete(_userTablosu, where: '$_id = ?' , whereArgs: [id]);
@@ -85,7 +85,7 @@ Future<int> userEkle(Users users) async{
 
   }
 
-  Future<int> tumOgrenciTablosunuSil() async{
+  Future<int> allUserListDelete() async{
 
     var db = await _getDatabase();
     var sonuc = db.delete(_userTablosu);
