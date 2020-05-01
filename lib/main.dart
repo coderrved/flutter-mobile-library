@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kutuphane/models/admin_sayfasi.dart';
 import 'package:kutuphane/models/kayit.dart';
 import 'package:kutuphane/models/users.dart';
 import 'package:kutuphane/utils/database_helpers.dart';
@@ -11,6 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: MyHomePage(),
     );
   }
@@ -191,7 +193,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => CSayfasi(),
+                                  builder: (context) => AdminSayfasi(),
                                 ),
                               );
                             }else{
