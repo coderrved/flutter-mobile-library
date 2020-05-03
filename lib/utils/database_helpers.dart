@@ -1,8 +1,8 @@
 
 import 'dart:async';
 import 'dart:io';
-
 import 'package:kutuphane/models/users.dart';
+import 'package:kutuphane/models/kitaplar.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
@@ -13,6 +13,11 @@ class DatabaseHelper{
   static Database _database;
 
   String _userTablosu = 'users';
+  String _kitapTablosu = 'kitaplar';
+  String _kitapId = 'kitapId';
+  String _kitapAdi = 'kitapAdi';
+  String _isbnNo = 'isbnNo';
+  String _kitapSayisi= 'kitapSayisi';
   String _id = 'id';
   String _kullaniciAdi = 'kullaniciAdi';
   String _sifre = 'sifre';
@@ -49,14 +54,14 @@ class DatabaseHelper{
     String path = join(klasor.path, "users.db");
     print('Olusan veritabanının yolu: $path');
 
-    var userDB = await openDatabase(path, version: 1, onCreate: _createDB);
+    var userDB = await openDatabase(path, version: 2, onCreate: _createDB);
     return userDB;
 }
-
 
 void _createDB(Database db, int version) async{
     print("CREATE TABLE OLUSTURULUYOR");
     await db.execute("CREATE TABLE $_userTablosu ($_id INTEGER PRIMARY KEY AUTOINCREMENT, $_kullaniciAdi TEXT, $_sifre TEXT, $_email TEXT )");
+    await db.execute("CREATE TABLE $_kitapTablosu ($_kitapId INTEGER PRIMARY KEY AUTOINCREMENT, $_kitapAdi TEXT, $_isbnNo TEXT, $_kitapSayisi TEXT )");
 }
 
 Future<int> userEkle(Users users) async{
@@ -65,9 +70,21 @@ Future<int> userEkle(Users users) async{
     print("ogrenci dbye eklendi: $sonDeger");
     return sonDeger;
 }
+
+  Future<int> kitapEkle(Kitaplar kitaplar) async{
+    var db = await _getDatabase();
+    var sonDeger = await db.insert(_kitapTablosu, kitaplar.toMap());
+    print("kitaplar dbye eklendi: $sonDeger");
+    return sonDeger;
+  }
   Future<List<Map<String, dynamic>>> allUsers() async{
     var db = await _getDatabase();
     var sonuc = db.query(_userTablosu, orderBy: '$_id DESC');
+    return sonuc;
+  }
+  Future<List<Map<String, dynamic>>> allKitaplar() async{
+    var db = await _getDatabase();
+    var sonuc = db.query(_kitapTablosu, orderBy: '$_kitapId DESC');
     return sonuc;
   }
 
@@ -92,7 +109,5 @@ Future<int> userEkle(Users users) async{
     return sonuc;
 
   }
-
-
 }
 

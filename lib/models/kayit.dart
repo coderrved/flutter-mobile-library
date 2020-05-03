@@ -1,6 +1,10 @@
+import 'package:flutter/gestures.dart';
 import 'package:kutuphane/utils/database_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:kutuphane/models/users.dart';
+
+import 'admin_sayfasi.dart';
+
 class FormScreen extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -31,12 +35,8 @@ class FormScreenState extends State<FormScreen> {
         allUserList.add(Users.fromMap(okunanMap));
       }
       setState(() {});
-    }).catchError((hata)=>print("hata:"+hata));
+    }).catchError((hata) => print("hata:" + hata));
   }
-
-
-
-
 
   Widget _buildName() {
     return Container(
@@ -46,8 +46,8 @@ class FormScreenState extends State<FormScreen> {
         borderRadius: BorderRadius.circular(20.0),
       ),
       child: TextFormField(
-        validator: (String value){
-          if(value.length<3){
+        validator: (String value) {
+          if (value.length < 3) {
             return "3 karakterden kucuk olamaz";
           }
           return null;
@@ -83,8 +83,8 @@ class FormScreenState extends State<FormScreen> {
       margin: EdgeInsets.symmetric(horizontal: 30.0, vertical: 5.0),
       child: TextFormField(
         controller: _passwordController,
-        validator: (String sifre){
-          if(sifre.length<3){
+        validator: (String sifre) {
+          if (sifre.length < 3) {
             return 'Sifre 3 karakterden kucuk olamaz';
           }
           return null;
@@ -120,8 +120,8 @@ class FormScreenState extends State<FormScreen> {
       ),
       margin: EdgeInsets.symmetric(horizontal: 30.0, vertical: 5.0),
       child: TextFormField(
-        validator: (String confirmSifre){
-          if(confirmSifre != _passwordController.text){
+        validator: (String confirmSifre) {
+          if (confirmSifre != _passwordController.text) {
             return 'Sifre eslesemedi.';
           }
           return null;
@@ -157,8 +157,8 @@ class FormScreenState extends State<FormScreen> {
       ),
       margin: EdgeInsets.symmetric(horizontal: 30.0, vertical: 5.0),
       child: TextFormField(
-        validator: (String email){
-          if(email.isEmpty){
+        validator: (String email) {
+          if (email.isEmpty) {
             return 'email zorunlu';
           }
           return null;
@@ -189,75 +189,73 @@ class FormScreenState extends State<FormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      resizeToAvoidBottomInset: false,
       body: GestureDetector(
         onTap: () {
-      FocusScope.of(context).requestFocus(new FocusNode());
-    },
-      child: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("assets/images/library.jpg"),
-            fit: BoxFit.cover,
+          FocusScope.of(context).requestFocus(new FocusNode());
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage("assets/images/library.jpg"),
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              _buildName(),
-              _buildPassword(),
-              _buildConfirmPassword(),
-              _buildEmail(),
-              Container(
-                width: 150,
-                height: 50,
-                margin: EdgeInsets.symmetric(vertical: 5.0),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                child: RaisedButton(
-                  color: Colors.black45,
-                  child: Text(
-                    "Kayıt Ol",
-                    style: TextStyle(color: Colors.red, fontSize: 18),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                _buildName(),
+                _buildPassword(),
+                _buildConfirmPassword(),
+                _buildEmail(),
+                Container(
+                  width: 150,
+                  height: 50,
+                  margin: EdgeInsets.symmetric(vertical: 5.0),
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(20.0),
                   ),
-                  onPressed: () {
-                    print('giris yapildi.');
-                    if (!_formKey.currentState.validate()) {
-                      return;
-                    }
-                    _formKey.currentState.save();
-                    print(_name);
-                    print(_email);
-                    print(_password);
-                    print(_confirmPassword);
-                    _userEkle(Users(_name,_password,_email));
-                    print(allUserList.toString());
-                    /*
+                  child: RaisedButton(
+                    color: Colors.black45,
+                    child: Text(
+                      "Kayıt Ol",
+                      style: TextStyle(color: Colors.red, fontSize: 18),
+                    ),
+                    onPressed: () {
+                      print('giris yapildi.');
+                      if (!_formKey.currentState.validate()) {
+                        return;
+                      }
+                      _formKey.currentState.save();
+                      print(_name);
+                      print(_email);
+                      print(_password);
+                      print(_confirmPassword);
+                      _userEkle(Users(_name, _password, _email));
+                      print(allUserList.toString());
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => CSayfasi(),
+                          builder: (context) => AdminSayfasi(),
                         ),
                       );
-                       */
-                  },
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
-      ),
     );
   }
-  void _userEkle(Users users) async{
+
+  void _userEkle(Users users) async {
     var eklenenYeniUserinIDsi = await _databaseHelper.userEkle(users);
     users.id = eklenenYeniUserinIDsi;
-    if(eklenenYeniUserinIDsi>0){
+    if (eklenenYeniUserinIDsi > 0) {
       setState(() {
         allUserList.insert(0, users);
       });

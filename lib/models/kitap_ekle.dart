@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+import 'package:kutuphane/models/kitaplar.dart';
+import 'package:kutuphane/utils/database_helpers.dart';
 
 class KitapEkle extends StatefulWidget {
   @override
@@ -10,13 +12,30 @@ class KitapEkle extends StatefulWidget {
 }
 
 class _KitapEkleState extends State<KitapEkle> {
+
+  DatabaseHelper _databaseHelper;
+  List<Kitaplar> allKitapList;
+  String gereksizleriKaldirr;
+  @override
+  void initState() {
+    super.initState();
+    allKitapList = List<Kitaplar>();
+    _databaseHelper = DatabaseHelper();
+    _databaseHelper.allKitaplar().then((mapListesi) {
+      // Veritabanındaki kullanıcılar uygulama başlarken listeye atıldı.
+      for (Map okunanMap in mapListesi) {
+        allKitapList.add(Kitaplar.fromMap(okunanMap));
+      }
+      setState(() {});
+    }).catchError((hata)=>print("hata:"+hata));
+  }
+
   File pickedImage;
   List kelimeleriTut = new List();
   String ISBNtut;
   bool isImageLoaded = false;
   final _kitapAdi = TextEditingController();
-
-  RegExp _isbn10Maybe = RegExp(r'^(?:[0-9]{9}X|[0-9]{10})$');
+  static String sonISBN = '';
 
   Future pickImage() async {
     var tempStore = await ImagePicker.pickImage(source: ImageSource.gallery);
@@ -42,14 +61,19 @@ class _KitapEkleState extends State<KitapEkle> {
     }
     for (int i = 0; i < kelimeleriTut.length; i++) {
       print('kelime: ' + kelimeleriTut[i]);
-      if (kelimeleriTut[i].toString() == 'ISBN:') {
+      bool isbn = kelimeleriTut[i].toString().startsWith("ISBN");
+      if(isbn == true){
+            gereksizleriKaldirr = kelimeleriTut[i].replaceAll(RegExp(r'[\s-:.,:]+'), ''); // ISBN içerisinde okuma hatalarından kaynaklı noktalı işaretler varsa onları çıkar
+            print('ISBN kelimesinin son hali: ' + gereksizleriKaldirr);
+      }
+      if (gereksizleriKaldirr == 'ISBN') {
         ISBNtut = kelimeleriTut[i + 1];
         print('ISBN numarası: ' + ISBNtut);
-        RegExp isbnCekenRegExp = RegExp(
-            r'^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+$'); // ISBN numarasi için regex
-        final match = isbnCekenRegExp.stringMatch(ISBNtut);
-        String gereksizleriKaldir = match.replaceAll(RegExp(r'[\s-]+'), '');
-        print('son durumda isbn: ' + gereksizleriKaldir);
+        sonISBN = ISBNtut.replaceAll(RegExp(r'[\s-]+'), '');
+        print('son durumda isbn: ' + sonISBN);
+        setState(() {
+
+        });
         break;
       }
     }
@@ -68,7 +92,10 @@ class _KitapEkleState extends State<KitapEkle> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
+        body: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).requestFocus(new FocusNode());
+          },
          child: SingleChildScrollView(
           child: Column(
             children: <Widget>[
@@ -109,11 +136,17 @@ class _KitapEkleState extends State<KitapEkle> {
                         ),
                         Container(
                           child: RaisedButton(
-                            onPressed: (){
-                              print('Kitap kaydet');
-                            },
-                            child: Text('Kitap Kayıt'),
+                          color: Colors.black45,
+                          child: Text(
+                            "Kitap Kayıt Et",
+                            style: TextStyle(color: Colors.red, fontSize: 18),
                           ),
+                          onPressed: () {
+                            print('kitap kaydedildi.');
+                            _kitapEkle(Kitaplar(_kitapAdi.text,sonISBN,'1'));
+                            print(allKitapList.toString());
+                          },
+                        ),
                         )
                       ],
                     )
@@ -135,6 +168,16 @@ class _KitapEkleState extends State<KitapEkle> {
             ],
           ),
          ),
-        ));
+        )
+    );
+  }
+  void _kitapEkle(Kitaplar kitaplar) async{
+    var eklenenYeniKitabinIDsi = await _databaseHelper.kitapEkle(kitaplar);
+    kitaplar.kitapId = eklenenYeniKitabinIDsi;
+    if(eklenenYeniKitabinIDsi>0){
+      setState(() {
+        allKitapList.insert(0, kitaplar);
+      });
+    }
   }
 }
