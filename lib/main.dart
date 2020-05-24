@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kutuphane/models/admin_sayfasi.dart';
 import 'package:kutuphane/models/kayit.dart';
+import 'package:kutuphane/models/kullanici_sayfasi.dart';
 import 'package:kutuphane/models/users.dart';
 import 'package:kutuphane/utils/database_helpers.dart';
 import 'package:sqflite/sqflite.dart';
@@ -30,7 +31,6 @@ class _MyHomePageState extends State<MyHomePage> {
   var scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   DatabaseHelper databaseHelper;
-  String _name, _password;
   final _passwordController = TextEditingController();
   final _userNameController = TextEditingController();
 
@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage("assets/images/library.jpg"),
+              image: AssetImage("assets/images/anasayfa.jpg"),
               fit: BoxFit.cover,
             ),
           ),
@@ -79,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         color: Colors.black,
                         fontSize: 42.0,
                         fontFamily: 'RobotoMono',
-                        backgroundColor: Colors.white54),
+                        ),
                   ),
                 ),
                 Container(
@@ -139,7 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   children: <Widget>[
                     Text(
                       'Kayıtlı değilseniz ',
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.white, fontSize: 17.0),
                     ),
                     GestureDetector(
                       onTap: () {
@@ -153,7 +153,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       },
                       child: Text(
                         'kayıt olun',
-                        style: TextStyle(color: Colors.blue),
+                        style: TextStyle(color: Colors.black, fontSize: 17.0),
                       ),
                     ),
                   ],
@@ -190,12 +190,22 @@ class _MyHomePageState extends State<MyHomePage> {
                             if (allUserList[i].kullaniciAdi == _userNameController.text && allUserList[i].sifre == _passwordController.text) {
                               _formKey.currentState.save();
                               print('basariyla giris yapildi.');
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => AdminSayfasi(),
-                                ),
-                              );
+                              if(_userNameController.text == "Vedat"){
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => AdminSayfasi(),
+                                  ),
+                                );
+                              }else{
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => KullaniciSayfasi(),
+                                  ),
+                                );
+                              }
+
                             }else{
                               print("Kullanıcı adı veya şifre hatalı");
                             }

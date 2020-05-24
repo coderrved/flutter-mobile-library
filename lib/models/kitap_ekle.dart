@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
@@ -16,6 +15,7 @@ class _KitapEkleState extends State<KitapEkle> {
   DatabaseHelper _databaseHelper;
   List<Kitaplar> allKitapList;
   String gereksizleriKaldirr;
+
   @override
   void initState() {
     super.initState();
@@ -92,14 +92,19 @@ class _KitapEkleState extends State<KitapEkle> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text("Kitap Ekle", style: TextStyle(color: Colors.white),),
+        backgroundColor: Colors.orangeAccent,
+      ),
         body: GestureDetector(
           onTap: () {
-            FocusScope.of(context).requestFocus(new FocusNode());
+            FocusScope.of(context).unfocus();
           },
-         child: SingleChildScrollView(
+         child: Container(
           child: Column(
             children: <Widget>[
-              SizedBox(height: 100.0),
+              SizedBox(height: 50.0),
               isImageLoaded
                   ? Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -151,20 +156,16 @@ class _KitapEkleState extends State<KitapEkle> {
                       ],
                     )
                   : Container(),
-              SizedBox(height: 10.0),
+              SizedBox(height: 5.0),
               RaisedButton(
                 child: Text('Pick an image'),
                 onPressed: pickImage,
               ),
-              SizedBox(height: 10.0),
+              SizedBox(height: 5.0),
               RaisedButton(
                 child: Text('Read Text'),
                 onPressed: readText,
               ),
-              RaisedButton(
-                child: Text('Read Bar Code'),
-                onPressed: decode,
-              )
             ],
           ),
          ),

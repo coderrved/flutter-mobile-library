@@ -1,6 +1,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'package:kutuphane/models/time.dart';
 import 'package:kutuphane/models/users.dart';
 import 'package:kutuphane/models/kitaplar.dart';
 import 'package:sqflite/sqflite.dart';
@@ -14,10 +15,16 @@ class DatabaseHelper{
 
   String _userTablosu = 'users';
   String _kitapTablosu = 'kitaplar';
+  String _timeTablosu = "time";
+
   String _kitapId = 'kitapId';
   String _kitapAdi = 'kitapAdi';
   String _isbnNo = 'isbnNo';
   String _kitapSayisi= 'kitapSayisi';
+
+  String _timeId = "timeId";
+  String _time = "time";
+
   String _id = 'id';
   String _kullaniciAdi = 'kullaniciAdi';
   String _sifre = 'sifre';
@@ -62,7 +69,8 @@ void _createDB(Database db, int version) async{
     print("CREATE TABLE OLUSTURULUYOR");
     await db.execute("CREATE TABLE $_userTablosu ($_id INTEGER PRIMARY KEY AUTOINCREMENT, $_kullaniciAdi TEXT, $_sifre TEXT, $_email TEXT )");
     await db.execute("CREATE TABLE $_kitapTablosu ($_kitapId INTEGER PRIMARY KEY AUTOINCREMENT, $_kitapAdi TEXT, $_isbnNo TEXT, $_kitapSayisi TEXT )");
-}
+    await db.execute("CREATE TABLE $_timeTablosu ($_timeId INTEGER PRIMARY KEY AUTOINCREMENT, $_time TEXT,)");
+  }
 
 Future<int> userEkle(Users users) async{
     var db = await _getDatabase();
@@ -71,12 +79,20 @@ Future<int> userEkle(Users users) async{
     return sonDeger;
 }
 
-  Future<int> kitapEkle(Kitaplar kitaplar) async{
+Future<int> kitapEkle(Kitaplar kitaplar) async{
     var db = await _getDatabase();
     var sonDeger = await db.insert(_kitapTablosu, kitaplar.toMap());
     print("kitaplar dbye eklendi: $sonDeger");
     return sonDeger;
   }
+
+  Future<int> timeEkle(Time time) async{
+    var db = await _getDatabase();
+    var sonDeger = await db.insert(_timeTablosu, time.toMap());
+    print("time dbye eklendi: $sonDeger");
+    return sonDeger;
+  }
+
   Future<List<Map<String, dynamic>>> allUsers() async{
     var db = await _getDatabase();
     var sonuc = db.query(_userTablosu, orderBy: '$_id DESC');
@@ -85,6 +101,11 @@ Future<int> userEkle(Users users) async{
   Future<List<Map<String, dynamic>>> allKitaplar() async{
     var db = await _getDatabase();
     var sonuc = db.query(_kitapTablosu, orderBy: '$_kitapId DESC');
+    return sonuc;
+  }
+  Future<List<Map<String, dynamic>>> allTime() async{
+    var db = await _getDatabase();
+    var sonuc = db.query(_timeTablosu, orderBy: '$_timeId DESC');
     return sonuc;
   }
 

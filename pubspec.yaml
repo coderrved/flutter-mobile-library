@@ -49,6 +49,8 @@ flutter:
   assets:
     - assets/images/library.jpg
     - assets/images/admin.jpg
+    - assets/images/user.jpg
+    - assets/images/anasayfa.jpg
 
   fonts:
     - family: Ewert

@@ -1,4 +1,5 @@
 class Kitaplar{
+
   int _kitapId;
   String _kitapAdi;
   String _isbnNo;
