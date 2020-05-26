@@ -90,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   child: TextFormField(
                     controller: _userNameController,
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.black),
                     decoration: InputDecoration(
                       hintText: 'Kullanıcı Adı',
                       hintStyle: TextStyle(
@@ -117,7 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: TextFormField(
                     controller: _passwordController,
                     obscureText: true,
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.black),
                     decoration: InputDecoration(
                       hintText: 'Şifre',
                       hintStyle: TextStyle(

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:kutuphane/models/kitaplar.dart';
 import 'package:kutuphane/utils/database_helpers.dart';
@@ -7,93 +9,146 @@ class KitapAl extends StatefulWidget {
   _KitapAlState createState() => _KitapAlState();
 }
 
+class Debouncer {
+  final int milliseconds;
+  VoidCallback action;
+  Timer _timer;
+
+  Debouncer({this.milliseconds});
+
+  run(VoidCallback action) {
+    if (null != _timer) {
+      _timer.cancel();
+    }
+    _timer = Timer(Duration(milliseconds: milliseconds), action);
+  }
+}
+
 class _KitapAlState extends State<KitapAl> {
-
-  List<Kitaplar> tumKitaplarList;
+  List<Kitaplar> allKitapList;
+  List<Kitaplar> filteredKitapList;
   DatabaseHelper databaseHelper;
-  List<int> kitapSay;
-  List<String> kitapAdi;
-
+  bool isSearching = false;
 
   @override
   void initState() {
     super.initState();
-    tumKitaplarList = List<Kitaplar>();
+    allKitapList = List<Kitaplar>();
     databaseHelper = DatabaseHelper();
-    databaseHelper.allUsers().then((mapListesi) {
+    databaseHelper.allKitaplar().then((mapListesi) {
       // Veritabanındaki kullanıcılar uygulama başlarken listeye atıldı.
       for (Map okunanMap in mapListesi) {
-        tumKitaplarList.add(Kitaplar.fromMap(okunanMap));
+        allKitapList.add(Kitaplar.fromMap(okunanMap));
       }
-      for(int k=0;k<tumKitaplarList.length;k++){
-        print(tumKitaplarList[k]);
-      }
-      kitapSay = List.generate(tumKitaplarList.length, (index)=>index);
-      kitapAdi = List.generate(tumKitaplarList.length, (index)=> "$index" );
+      setState(() {
+        filteredKitapList = allKitapList;
+      });
+    }).catchError((hata) => print("hata:" + hata));
+  }
 
-      setState(() {});
+  void _filterCountries(value) {
+    setState(() {
+      filteredKitapList = allKitapList
+          .where((country) =>
+              country.kitapAdi.toLowerCase().contains(value.toLowerCase()) || country.isbnNo.contains(value))
+          .toList();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        child: ListView(
-          children: kitapSay.map(
-              (oAnkiEleman) => Column(
-                children: <Widget>[
-                  Container(
-                    child: Card(
-                      margin: EdgeInsets.all(12.0),
-                      color: Colors.orangeAccent,
-                      elevation: 10,
-                      child: ListTile(
-                        title: Text(tumKitaplarList[oAnkiEleman].toString()),
-                        trailing: Icon(Icons.add_circle),
-                      ),
+      appBar: AppBar(
+        backgroundColor: Colors.pink,
+        title: !isSearching
+            ? Text('Tüm Kitaplar')
+            : TextField(
+                onChanged: (value) {
+                  _filterCountries(value);
+                },
+                style: TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                    icon: Icon(
+                      Icons.search,
+                      color: Colors.white,
                     ),
-                  )
-                ],
-              )
-          ).toList(),
+                    hintText: "Kitap Ara",
+                    hintStyle: TextStyle(color: Colors.white)),
+              ),
+        actions: <Widget>[
+          isSearching
+              ? IconButton(
+                  icon: Icon(Icons.cancel),
+                  onPressed: () {
+                    setState(() {
+                      this.isSearching = false;
+                      filteredKitapList = allKitapList;
+                    });
+                  },
+                )
+              : IconButton(
+                  icon: Icon(Icons.search),
+                  onPressed: () {
+                    setState(() {
+                      this.isSearching = true;
+                    });
+                  },
+                )
+        ],
+      ),
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).requestFocus(new FocusNode());
+        },
+        child: Container(
+          padding: EdgeInsets.all(5),
+          child: Card(
+          child: filteredKitapList.length > 0
+              ? ListView.builder(
+                  itemCount: filteredKitapList.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return GestureDetector(
+                      onTap: () {
+                        FocusScope.of(context).requestFocus(new FocusNode());
+                      },
+                      child: Card(
+                        elevation: 10,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Container(
+                              child: Text(filteredKitapList[index].kitapSayisi, style: TextStyle(fontSize: 18.0),),
+                              margin: EdgeInsets.all(15.0),
+                            ),
+                            Container(
+                              child: Text(filteredKitapList[index].kitapAdi, style: TextStyle(fontSize: 18.0,), textAlign: TextAlign.center,),
+                              //margin: EdgeInsets.symmetric(horizontal: 40.0),
+                            ),
+                            Container(
+                              child: Text(filteredKitapList[index].isbnNo, style: TextStyle(fontSize: 18.0), textAlign: TextAlign.right,),
+                             // margin: EdgeInsets.fromLTRB(20, 10, 0, 10),
+                            ),
+                            Container(
+                              child: IconButton(
+                                icon: Icon(Icons.add_circle, size: 25.0,),
+                                onPressed: (){
+                                  print('islem basarili'); // Veritabani islemleri buraya gelecek.
+                                },
+                              ),
+                              margin: EdgeInsets.all(10.0),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  })
+              : Center(
+                  child: CircularProgressIndicator(),
+                ),
         ),
+      ),
       ),
     );
   }
 }
-
-/*
-child: ListView(
-          children: <Widget>[
-            Column(
-              children: <Widget>[
-                Container(
-                  child: Card(
-                    margin: EdgeInsets.all(12.0),
-                    color: Colors.orangeAccent,
-                    elevation: 10,
-                    child: ListTile(
-                      title: Text("Deneme yazisi"),
-                    ),
-                  ),
-                )
-              ],
-            ),
-            Column(
-              children: <Widget>[
-                Container(
-                  child: Card(
-                    margin: EdgeInsets.all(12.0),
-                    color: Colors.orangeAccent,
-                    elevation: 10,
-                    child: ListTile(
-                      title: Text("Deneme yazisi"),
-                    ),
-                  ),
-                )
-              ],
-            ),
-          ],
-        ),
- */
