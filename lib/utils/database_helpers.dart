@@ -115,6 +115,12 @@ Future<int> kitapEkle(Kitaplar kitaplar) async{
     return sonuc;
   }
 
+  Future<int> kitapGuncelle(Kitaplar kitaplar) async{
+    var db = await _getDatabase();
+    var sonuc = db.update(_kitapTablosu, kitaplar.toMap(), where: '$_kitapId = ?', whereArgs: [kitaplar.kitapId]);
+    return sonuc;
+  }
+
   Future<int> userSil(int id) async{
 
     var db = await _getDatabase();

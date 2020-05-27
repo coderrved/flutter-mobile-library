@@ -50,8 +50,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    //ekle();
-
     return Scaffold(
       key: scaffoldKey,
       body: GestureDetector(

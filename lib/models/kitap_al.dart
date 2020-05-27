@@ -134,6 +134,7 @@ class _KitapAlState extends State<KitapAl> {
                                 icon: Icon(Icons.add_circle, size: 25.0,),
                                 onPressed: (){
                                   print('islem basarili'); // Veritabani islemleri buraya gelecek.
+                                  
                                 },
                               ),
                               margin: EdgeInsets.all(10.0),

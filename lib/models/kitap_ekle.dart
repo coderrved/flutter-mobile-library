@@ -39,7 +39,6 @@ class _KitapEkleState extends State<KitapEkle> {
 
   Future pickImage() async {
     var tempStore = await ImagePicker.pickImage(source: ImageSource.gallery);
-
     setState(() {
       pickedImage = tempStore;
       isImageLoaded = true;

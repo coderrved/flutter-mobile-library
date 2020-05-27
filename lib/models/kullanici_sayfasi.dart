@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kutuphane/models/kitap_teslim.dart';
 import 'package:kutuphane/models/zaman_atlama.dart';
 
 import '../main.dart';
@@ -88,7 +89,7 @@ class _KullaniciSayfasiState extends State<KullaniciSayfasi> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ZamanAtlama(),
+                      builder: (context) => KitapTeslim(),
                     ),
                   );
                 },
